@@ -72,7 +72,7 @@ def get_reel_stats(reels: list) -> dict:
 
 
 def print_reel_stats(reels: list) -> None:
-    stats =get_reel_stats(reels)
+    stats = get_reel_stats(reels)
     for col_idx, col_stats in stats.items():
         total = len(reels[col_idx])
         print(f"\nColumn {col_idx} ({total} simbols):")
