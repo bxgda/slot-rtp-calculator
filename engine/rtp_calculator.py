@@ -3,13 +3,13 @@ from engine.spin_engine import spin
 
 def simulate_rtp(
     num_spins, 
+    base_reels, 
+    free_spin_reels_dict, 
     num_rows, 
-    get_reels_func, 
     evaluate_func, 
     bet_per_spin=1
 ):
-    # Runs the generic slot simulation.
-  
+    
     total_bet = 0
     total_win = 0
     
@@ -24,8 +24,7 @@ def simulate_rtp(
         # 1. Deduct bet for a base game spin
         total_bet += bet_per_spin
         
-        # 2. Get base game reels and play base spin
-        base_reels = get_reels_func(is_free_spin=False, game_state=None)
+        # 2. Run a base game spin passing the base matrix
         base_spin_result = spin(
             reels=base_reels, 
             num_rows=num_rows, 
@@ -48,18 +47,22 @@ def simulate_rtp(
             
             remaining_free_spins = base_spin_result.get('free_spin_count', 0)
             
-            # The game passes its persistent state (like the chosen expanding symbol) 
-            # within the result dict. The generic engine doesn't care what is inside.
-            current_game_state = base_spin_result.get('game_state', None)
+            # Extract state which tells us WHICH reels to use from the matrix
+            current_game_state = base_spin_result.get('game_state', {})
             
             # 4. Play Free Spins until empty
             while remaining_free_spins > 0:
                 remaining_free_spins -= 1
                 total_free_spins_played += 1
                 
-                # Fetch dynamically selected reels based on game_state
-                fs_reels = get_reels_func(is_free_spin=True, game_state=current_game_state)
+                # Dinamically select reels from the matrix (fallback to base_reels if not special)
+                expanding_symbol = current_game_state.get('expanding_symbol')
+                if expanding_symbol and free_spin_reels_dict:
+                    fs_reels = free_spin_reels_dict[expanding_symbol]
+                else:
+                    fs_reels = base_reels
                 
+                # Pass ONLY the selected reels for this spin into spin_engine
                 fs_result = spin(
                     reels=fs_reels,
                     num_rows=num_rows,
