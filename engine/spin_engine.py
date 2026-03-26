@@ -1,6 +1,5 @@
 import random
 
-
 def _generate_grid(reels, num_rows):
     # Creates a random grid by selecting random stop positions on each reel.
     
@@ -31,7 +30,7 @@ def _generate_grid(reels, num_rows):
     return grid, stops
 
 
-def spin(reels, num_rows, evaluate_func, is_free_spin=False, expanding_symbol=None):
+def spin(reels, num_rows, evaluate_func, is_free_spin=False, game_state=None):
     # Executes a single spin.
  
     # 1. Generate the random grid
@@ -41,7 +40,7 @@ def spin(reels, num_rows, evaluate_func, is_free_spin=False, expanding_symbol=No
     evaluation_result = evaluate_func(
         grid=grid,
         is_free_spin=is_free_spin,
-        expanding_symbol=expanding_symbol
+        game_state=game_state
     )
     
     # 3. Create a final result dictionary with engine data + game data

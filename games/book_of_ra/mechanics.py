@@ -1,3 +1,5 @@
+import random
+
 from games.book_of_ra.config import (
     WILD,
     SCATTER,
@@ -5,6 +7,7 @@ from games.book_of_ra.config import (
     FREE_SPIN_PAYTABLE,
     SCATTER_PAYS,
     FREE_SPINS,
+    FREE_SPIN_SYMBOLS
 )
 
 
@@ -128,36 +131,49 @@ def _evaluate_scatter(scatter_count):
 
     return 0
 
-def evaluate(grid, is_free_spin=False, expanding_symbol=None):
-    # Main evaluation function — called by spin_engine.py for every spin.
 
-    # apply expanding symbol mechanic if this is a free spin
+def evaluate(grid, is_free_spin=False, game_state=None):
+    
+    # 1. Read expanding symbol from game_state if it exists
+    expanding_symbol = None
+    if game_state is not None and 'expanding_symbol' in game_state:
+        expanding_symbol = game_state['expanding_symbol']
+
+    # 2. Apply expanding symbol mechanic if this is a free spin
     if is_free_spin and expanding_symbol is not None:
         grid = _apply_expanding(grid, expanding_symbol)
 
-    # choose correct paytable
+    # 3. Choose correct paytable
     if is_free_spin:
         paytable = FREE_SPIN_PAYTABLE
     else:
         paytable = BASE_PAYTABLE
 
-    # get middle line
+    # 4. Get middle line
     line = _get_middle_line(grid)
 
-    # evaluate line win
+    # 5. Evaluate line win
     line_win = _evaluate_line(line, paytable)
 
-    # evaluate scatter
+    # 6. Evaluate scatter
     scatter_count = _count_scatter(grid)
     scatter_win_mult = _evaluate_scatter(scatter_count)
 
-    # check if free spins triggered
+    # 7. Check if free spins triggered
     if scatter_count >= FREE_SPINS['trigger_count']:
         trigger = True
         free_spin_count = FREE_SPINS['count']
     else:
         trigger = False
         free_spin_count = 0
+        
+    # 8. Manage game_state
+    new_game_state = game_state
+    
+    # If we hit a trigger from the BASE GAME, we must pick a random expanding symbol
+    if trigger and not is_free_spin:
+        chosen_symbol = random.choice(FREE_SPIN_SYMBOLS)
+        new_game_state = {'expanding_symbol': chosen_symbol}
 
     return {
         'line_win':           line_win,
@@ -167,4 +183,5 @@ def evaluate(grid, is_free_spin=False, expanding_symbol=None):
         'free_spin_count':    free_spin_count,
         'grid':               grid,
         'line':               line,
+        'game_state':         new_game_state
     }
