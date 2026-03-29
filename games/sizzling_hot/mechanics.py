@@ -1,15 +1,7 @@
-"""
-games/sizzling_hot/mechanics.py
-
-Mechanics logic for Sizzling Hot Deluxe.
-Focuses on evaluating the middle line and grid-wide scatters.
-"""
-
 from games.sizzling_hot.config import (
     SCATTER,
     BASE_PAYTABLE,
-    SCATTER_PAYS_TOTAL_BET_MULT,
-    NUM_LINES
+    SCATTER_PAYS_TOTAL_BET_MULT
 )
 
 def _get_middle_line(grid):
@@ -49,7 +41,7 @@ def _count_scatter(grid):
     return count
 
 def evaluate(grid, is_free_spin=False, game_state=None):
-    # 1. Get middle line and evaluate payout
+    # 1. Get middle line ONLY
     line = _get_middle_line(grid)
     line_win = _evaluate_line(line)
 
@@ -57,12 +49,11 @@ def evaluate(grid, is_free_spin=False, game_state=None):
     scatter_count = _count_scatter(grid)
     
     # 3. Calculate scatter win. 
-    # Because our engine evaluates line_win independently of scatter,
-    # and scatter multiplies TOTAL bet (which is NUM_LINES * line_bet).
-    # Since bet_per_line is assumed 1 in our model, scatter win is: mult * NUM_LINES
+    # CIST RACUN: Posto simuliramo samo 1 liniju, nas ulog je 1x. 
+    # Zato scatter mnozimo samo sa osnovnim mnoziocem iz tabele, bez dodavanja broja linija.
     scatter_win_mult = 0
     if scatter_count in SCATTER_PAYS_TOTAL_BET_MULT:
-        scatter_win_mult = SCATTER_PAYS_TOTAL_BET_MULT[scatter_count] * NUM_LINES
+        scatter_win_mult = SCATTER_PAYS_TOTAL_BET_MULT[scatter_count]
 
     # Sizzling hot never triggers free spins
     trigger_free_spins = False

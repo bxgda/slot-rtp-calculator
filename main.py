@@ -1,14 +1,16 @@
 import os
-from games.book_of_ra import parser
-from games.book_of_ra import config
-from games.book_of_ra import mechanics
+# PROMENJENO: Sada uvozimo sizzling_hot umesto book_of_ra
+from games.sizzling_hot import parser
+from games.sizzling_hot import config
+from games.sizzling_hot import mechanics
 from engine.rtp_calculator import simulate_rtp
 
 def main():
     print(f"=== {config.GAME_NAME} RTP Calculator ===")
     
     # 1. Load raw response data
-    input_path = os.path.join("input", "raw_response_book_of_ra.txt")
+    # PROMENJENO: Gađamo novi txt fajl
+    input_path = os.path.join("input", "raw_response_sizzling_hot.txt")
     try:
         with open(input_path, "r", encoding="utf-8") as f:
             raw_response = f.read()
@@ -16,14 +18,14 @@ def main():
         print(f"Error: Could not find '{input_path}'. Make sure the file exists.")
         return
 
-    # 2. Parse all matrices from raw response (Base + Free Spins)
+    # 2. Parse all matrices from raw response
     print("Parsing reels from raw response...")
     base_reels = parser.parse_base_game(raw_response)
     free_spin_reels_dict = parser.parse_free_spin_reels(raw_response)
     
     # 3. Simulation settings
-    NUMBER_OF_SPINS = 100_000   # You can increase this to 100_000 or 1_000_000 for more precise RTP
-    BET_PER_SPIN = 10         # Standard bet (creates round numbers for evaluation)
+    NUMBER_OF_SPINS = 1_000_000   
+    BET_PER_SPIN = 10         
 
     # 4. Run the simulation
     results = simulate_rtp(
@@ -50,7 +52,7 @@ def main():
     print(f"Free Spins Triggered: {results['free_spins_triggered']:,} times")
     print(f"Free Spins Played:    {results['total_free_spins_played']:,}")
     print("="*50)
-    # Target RTP from config name is 95%
+    # Target RTP for Sizzling hot is ~95.6%
     print(f"FINAL CALCULATED RTP: {results['rtp_percentage']:.4f}%")
     print("="*50)
 
